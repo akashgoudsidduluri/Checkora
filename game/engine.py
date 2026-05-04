@@ -67,15 +67,15 @@ class ChessGame:
     #  Construction / serialization
     # ------------------------------------------------------------------
 
-    def __init__(self):
+    def __init__(self, time_seconds=600):
         self.board = [row[:] for row in self.INITIAL_BOARD]
         self.current_turn = 'white'
         self.move_history = []
         self.captured = {'white': [], 'black': []}
         # DP Table: {(row, col): [list of moves]}
         self.valid_moves_cache = {}
-        self.white_time = 10 * 60  # 10 minutes
-        self.black_time = 10 * 60
+        self.white_time = time_seconds
+        self.black_time = time_seconds
         self.last_ts = time.time()
         self.paused = False
         self.mode = 'pvp'

@@ -110,7 +110,9 @@ def new_game(request):
     request.session['difficulty'] = difficulty
     request.session['player_color'] = player_color
 
-    game = ChessGame()
+    time_control = int(data.get('time_control', 600))
+
+    game = ChessGame(time_seconds=time_control)
     game.mode = mode
     game.player_color = player_color
     game.paused = False

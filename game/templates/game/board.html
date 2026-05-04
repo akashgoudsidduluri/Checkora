@@ -51,6 +51,17 @@
                     style="padding: 10px; border-radius: 5px; border: 1px solid #444; background: #1a1a2e; color: #fff;">
             </div>
 
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ccc; display: block; margin-bottom: 5px; font-size: 0.9rem; text-align: center;">Time Control</label>
+                <select id="welcomeTimeControl"
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #444; background: #1a1a2e; color: #fff;">
+                    <option value="60">1 min (Bullet)</option>
+                    <option value="180">3 min (Blitz)</option>
+                    <option value="600" selected>10 min (Rapid)</option>
+                    <option value="1800">30 min (Classical)</option>
+                </select>
+            </div>
+
             <div id="modeSelection" style="display: flex; flex-direction: column; gap: 14px;">
                 <button class="btn btn-gold" id="welcomePvPBtn" style="padding: 12px; font-size: 1.05rem;">Pass & Play
                     (PvP)</button>
@@ -864,6 +875,11 @@
                     const winner = color === 'white' ? 'Black' : 'White';
                     title = 'Resignation';
                     message = `${color.charAt(0).toUpperCase() + color.slice(1)} resigned. ${winner} wins!`;
+                } else if (reason === 'timeout') {
+                    const loser = color === 'white' ? 'White' : 'Black';
+                    const winner = color === 'white' ? 'Black' : 'White';
+                    title = 'Time Up!';
+                    message = `${loser} is out of time. ${winner} wins!`;
                 }
 
                 gameOverTitle.textContent = title;
@@ -903,9 +919,14 @@
             function startTimer() {
                 clearInterval(timerInterval);
                 timerInterval = setInterval(() => {
-                    if (paused) return;
-                    if (turn === 'white' && whiteTime > 0) whiteTime--;
-                    if (turn === 'black' && blackTime > 0) blackTime--;
+                    if (paused || gameOver) return;
+                    if (turn === 'white') {
+                        if (whiteTime > 0) whiteTime--;
+                        if (whiteTime <= 0) endGame('timeout', 'white');
+                    } else {
+                        if (blackTime > 0) blackTime--;
+                        if (blackTime <= 0) endGame('timeout', 'black');
+                    }
                     renderClocks();
                 }, 1000);
             }
@@ -989,12 +1010,15 @@
                 const wName = document.getElementById('whiteNameInput')?.value || 'White';
                 const bName = document.getElementById('blackNameInput')?.value || 'Black';
 
+                const timeControl = parseInt(document.getElementById('welcomeTimeControl')?.value || '600');
+
                 const d = await post('/api/new-game/', {
                     mode: mode,
                     player_color: pColor,
                     white_name: wName,
                     black_name: bName,
-                    difficulty: difficulty
+                    difficulty: difficulty,
+                    time_control: timeControl
                 });
 
                 board = d.board;
