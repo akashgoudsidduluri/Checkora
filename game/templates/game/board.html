@@ -440,8 +440,10 @@
 
                 if (modeBadge) modeBadge.textContent = gameMode === 'ai' ? 'VS AI' : 'PVP';
 
-                // Show Resume button if move history exists
-                if (data.move_history && data.move_history.length > 0) {
+                // Show Resume button if we have an ongoing game
+                const hasMoves = data.move_history && data.move_history.length > 0;
+                const isAI = data.mode === 'ai';
+                if (hasMoves || isAI) {
                     if (welcomeResumeBtn) welcomeResumeBtn.style.display = 'block';
                 } else {
                     if (welcomeResumeBtn) welcomeResumeBtn.style.display = 'none';
